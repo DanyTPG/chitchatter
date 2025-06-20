@@ -16,3 +16,23 @@ export const fileTransfer = new FileTransfer({
     },
   },
 })
+
+// FIXME: Move this to the services directory
+
+export class FileTransferService {
+  fileTransfer: FileTransfer
+
+  // FIXME: Rename _rtcConfig to rtcConfig
+  constructor(_rtcConfig: RTCConfiguration) {
+    this.fileTransfer = new FileTransfer({
+      torrentOpts: {
+        announce: trackerUrls,
+      },
+      webtorrentInstanceOpts: {
+        tracker: {
+          rtcConfig: _rtcConfig,
+        },
+      },
+    })
+  }
+}

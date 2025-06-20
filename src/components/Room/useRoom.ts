@@ -1,38 +1,39 @@
+import { useDebounce } from '@react-hook/debounce'
 import { useContext, useEffect, useMemo, useState } from 'react'
 import { BaseRoomConfig } from 'trystero'
 import { RelayConfig } from 'trystero/torrent'
 import { v4 as uuid } from 'uuid'
-import { useDebounce } from '@react-hook/debounce'
 
-import { ShellContext } from 'contexts/ShellContext'
+import { getPeerName, usePeerNameDisplay } from 'components/PeerNameDisplay'
+import { RoomContextProps } from 'contexts/RoomContext'
 import { SettingsContext } from 'contexts/SettingsContext'
-import { PeerAction } from 'models/network'
+import { ShellContext } from 'contexts/ShellContext'
+import { usePeerAction } from 'hooks/usePeerAction'
+import { Audio } from 'lib/Audio'
+import { fileTransfer, FileTransferService } from 'lib/FileTransfer'
+import { ActionNamespace, PeerHookType, PeerRoom } from 'lib/PeerRoom'
+import { time } from 'lib/Time'
 import {
+  AudioChannelName,
   AudioState,
-  Message,
-  ReceivedMessage,
-  UnsentMessage,
-  InlineMedia,
-  ReceivedInlineMedia,
-  UnsentInlineMedia,
-  VideoState,
-  ScreenShareState,
-  isMessageReceived,
-  isInlineMedia,
   FileOfferMetadata,
-  TypingStatus,
+  InlineMedia,
+  isInlineMedia,
+  isMessageReceived,
+  Message,
   Peer,
   PeerVerificationState,
-  AudioChannelName,
+  ReceivedInlineMedia,
+  ReceivedMessage,
+  ScreenShareState,
+  TypingStatus,
+  UnsentInlineMedia,
+  UnsentMessage,
+  VideoState,
 } from 'models/chat'
-import { getPeerName, usePeerNameDisplay } from 'components/PeerNameDisplay'
-import { Audio } from 'lib/Audio'
-import { time } from 'lib/Time'
-import { PeerRoom, PeerHookType, ActionNamespace } from 'lib/PeerRoom'
-import { notification } from 'services/Notification'
-import { fileTransfer } from 'lib/FileTransfer'
+import { PeerAction } from 'models/network'
 import { AllowedKeyType, encryption } from 'services/Encryption'
-import { usePeerAction } from 'hooks/usePeerAction'
+import { notification } from 'services/Notification'
 
 import { messageTranscriptSizeLimit } from 'config/messaging'
 
@@ -153,7 +154,11 @@ export function useRoom(
     Record<string, FileOfferMetadata>
   >({})
 
-  const roomContextValue = useMemo(
+  // FIXME: Rename this to fileTransfer
+  // FIXME: Provide actual rtcConfig
+  const _fileTransfer = useMemo(() => new FileTransferService({}), [])
+
+  const roomContextValue: RoomContextProps = useMemo(
     () => ({
       isPrivate,
       isMessageSending,
@@ -170,6 +175,7 @@ export function useRoom(
       setPeerScreenStreams,
       peerOfferedFileMetadata,
       setPeerOfferedFileMetadata,
+      fileTransfer: _fileTransfer,
     }),
     [
       isPrivate,
@@ -187,6 +193,7 @@ export function useRoom(
       setPeerScreenStreams,
       peerOfferedFileMetadata,
       setPeerOfferedFileMetadata,
+      _fileTransfer,
     ]
   )
 

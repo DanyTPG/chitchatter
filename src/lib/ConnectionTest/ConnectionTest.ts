@@ -134,5 +134,3 @@ export class ConnectionTest extends EventTarget {
     return this.trackerConnection
   }
 }
-
-export const connectionTest = new ConnectionTest()
